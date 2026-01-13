@@ -1265,3 +1265,467 @@ Tham số khóa	regionCode (ví dụ: 'VN', 'US')	q (query) với filter year:YY
 Kết quả	Dataset đa văn hóa, xu hướng toàn cầu	Dataset đa thời đại, lịch sử âm nhạc
 Rủi ro	Dữ liệu trùng lặp (cần lọc kỹ)	Tốc độ chậm (do phải sleep tránh lỗi 429)
 Nếu giáo viên hỏi: "Tại sao em không dùng lệnh Search bình thường?" Bạn trả lời: "Thưa thầy/cô, lệnh Search của YouTube quá tốn kém tài nguyên (gấp 100 lần), còn lệnh Search của Spotify thì bị giới hạn số lượng kết quả trả về. Hai phương pháp trên là cách tối ưu nhất để sinh viên có thể xây dựng bộ dữ liệu lớn (Large Scale Dataset) mà không cần trả phí cho bản Enterprise."
+Mục tiêu: Xây dựng một hệ thống dữ liệu tự động (End-to-End Pipeline) từ Data Lake đến Machine Learning Model. giải thích mục tiêu
+
+Mục tiêu "Xây dựng một hệ thống dữ liệu tự động (End-to-End Pipeline) từ Data Lake đến Machine Learning Model" nghe có vẻ phức tạp, nhưng bạn có thể hình dung nó giống như việc thiết kế một dây chuyền nhà máy tự động thay vì làm thủ công từng bước.
+
+Dưới đây là giải thích chi tiết về mục tiêu này, chia nhỏ thành các thành phần dễ hiểu:
+
+1. Ý nghĩa cốt lõi
+Trong Data Science, việc xây dựng mô hình (Model) chỉ là một phần nhỏ. Mục tiêu của pipeline này là tự động hóa toàn bộ quy trình: từ lúc dữ liệu thô (raw data) được sinh ra cho đến khi mô hình AI đưa ra dự đoán cho người dùng, mà không cần con người phải copy-paste hay chạy code thủ công mỗi ngày.
+
+2. Chi tiết các chặng trong "End-to-End Pipeline"
+Mục tiêu của bạn là kết nối 4 giai đoạn sau thành một dòng chảy liền mạch:
+
+Giai đoạn 1: Data Lake (Kho nguyên liệu thô)
+Hiện trạng: Dữ liệu nằm rải rác, lộn xộn (file CSV, log server, hình ảnh, dữ liệu từ app...). Chúng được đổ dồn vào một nơi gọi là Data Lake (như AWS S3, HDFS, Google Cloud Storage).
+
+Mục tiêu: Hệ thống phải tự động "lắng nghe" hoặc định kỳ quét Data Lake để biết khi nào có dữ liệu mới.
+
+Giai đoạn 2: Data Processing & ETL (Sơ chế)
+Công việc: Dữ liệu thô không thể đưa vào AI ngay (bị nhiễu, thiếu, sai định dạng).
+
+Mục tiêu: Pipeline tự động kích hoạt các công cụ (như Spark, Pandas) để:
+
+Làm sạch (Cleaning): Xóa dữ liệu lỗi.
+
+Biến đổi (Transformation): Chuyển đổi định dạng.
+
+Trích xuất đặc trưng (Feature Engineering): Tạo ra các cột dữ liệu có ý nghĩa cho Model học.
+
+Giai đoạn 3: Model Training (Dây chuyền sản xuất)
+Công việc: Huấn luyện mô hình Machine Learning.
+
+Mục tiêu: Khi có dữ liệu sạch mới, hệ thống tự động:
+
+Retrain (Huấn luyện lại) mô hình để nó thông minh hơn.
+
+Đánh giá (Evaluation): Tự động kiểm tra xem model mới có tốt hơn model cũ không. Nếu tốt hơn → sang bước tiếp theo.
+
+Giai đoạn 4: Model Serving/Deployment (Phân phối sản phẩm)
+Công việc: Đưa mô hình ra thực tế để sử dụng.
+
+Mục tiêu: Tự động đẩy mô hình lên server (API) hoặc ứng dụng. Khi người dùng thao tác, mô hình trả về kết quả ngay lập tức.
+
+3. Tại sao mục tiêu này lại quan trọng? (Giá trị mang lại)
+Nếu không có pipeline này, Data Scientist phải làm thủ công: tải dữ liệu -> chạy code clean -> chạy code train -> copy model bỏ vào server.
+
+Việc xây dựng pipeline giải quyết 3 vấn đề lớn:
+
+Tốc độ (Speed): Dữ liệu mới có hôm nay → Model học được ngay lập tức (Near Real-time).
+
+Độ tin cậy (Reliability): Giảm thiểu lỗi do con người (quên chạy dòng code này, lỡ tay xóa file kia).
+
+Khả năng mở rộng (Scalability): Dù dữ liệu tăng từ 1GB lên 1TB, hệ thống tự động vẫn chạy ổn định, chỉ cần nâng cấp phần cứng bên dưới.
+
+4. Ví dụ thực tế dễ hình dung
+Hệ thống gợi ý của TikTok/YouTube:
+
+Data Lake: Lưu log bạn vừa bấm "Like" một video mèo.
+
+Pipeline: Tự động lấy log đó, làm sạch, biến đổi thành vector sở thích.
+
+Model: Tự động học lại rằng bạn thích mèo.
+
+Serving: Lần lướt tiếp theo (chỉ vài giây/phút sau), Feed của bạn hiện ra nhiều video mèo hơn.
+
+Tóm lại
+Mục tiêu này là chuyển đổi từ việc "Làm Data Science thủ công" sang "Kỹ thuật vận hành máy học (MLOps)".
+Lưu ý: Sinh viên cần chuyển hóa các vấn đề cốt lõi thành Giả thuyết khoa học ($H_0, H_1$) trong Report 1.
+
+giải thích thêm về lưu ý này
+
+Chào bạn, yêu cầu này yêu cầu bạn chuyển từ cách đặt vấn đề bằng "ngôn ngữ đời thường" sang "ngôn ngữ thống kê". Đây là bước bắt buộc trong nghiên cứu khoa học để chứng minh kết quả của bạn là đáng tin cậy chứ không phải do ngẫu nhiên.
+
+Dưới đây là giải thích đơn giản và cách bạn viết vào báo cáo cho dự án YouTube Trending của mình:
+
+1. Hiểu về H 
+0
+​
+  và H 
+1
+​
+  (Cực dễ hiểu)
+Trong thống kê, chúng ta luôn phải xét 2 kịch bản đối lập nhau:
+
+H 
+0
+​
+  (Null Hypothesis - Giả thuyết Vô hiệu/Giả thuyết Không): Là giả thuyết "chán ngắt", mặc định. Nó cho rằng KHÔNG có gì đặc biệt xảy ra cả. Không có sự khác biệt, không có mối liên hệ nào hết.
+
+H 
+1
+​
+  (Alternative Hypothesis - Giả thuyết Đối): Là giả thuyết "thú vị" mà bạn đang mong muốn chứng minh. Nó cho rằng CÓ sự khác biệt, CÓ mối liên hệ.
+
+Quy tắc: Mục tiêu của nghiên cứu là thu thập dữ liệu để bác bỏ H 
+0
+​
+  và chấp nhận H 
+1
+​
+ .
+
+2. Áp dụng vào dự án YouTube của bạn
+Bạn cần viết lại các giả thuyết ở phần trước thành dạng cặp H 
+0
+​
+ /H 
+1
+​
+  như sau:
+
+Vấn đề 1: Thời điểm vàng (Golden Time)
+Câu hỏi cũ: "Upload video vào khung giờ vàng (18h-21h) có dễ lọt Top Trending hơn giờ hành chính không?"
+
+Chuyển hóa thành H 
+0
+​
+ ,H 
+1
+​
+ :
+
+Gọi μ 
+1
+​
+  là lượng view trung bình của video đăng giờ vàng.
+
+Gọi μ 
+2
+​
+  là lượng view trung bình của video đăng giờ hành chính.
+
+H 
+0
+​
+ : Việc đăng video vào khung giờ vàng không ảnh hưởng đến lượng view. (μ 
+1
+​
+ =μ 
+2
+​
+ )
+
+H 
+1
+​
+ : Video đăng vào khung giờ vàng có lượng view cao hơn video đăng giờ hành chính. (μ 
+1
+​
+ >μ 
+2
+​
+ )
+
+Vấn đề 2: Tương tác tiêu cực (Engagement)
+Câu hỏi cũ: "Lượng Dislike có ảnh hưởng đến khả năng viral (lượng view) không?"
+
+Chuyển hóa thành H 
+0
+​
+ ,H 
+1
+​
+ :
+
+Gọi ρ (rho) là hệ số tương quan giữa Dislike và View.
+
+H 
+0
+​
+ : Số lượng Dislike không có mối liên hệ nào với lượng View. (ρ=0)
+
+H 
+1
+​
+ : Số lượng Dislike có tương quan thuận với lượng View (càng bị ghét càng nhiều view). (ρ>0)
+
+Vấn đề 3: Tiêu đề giật gân (Clickbait)
+Câu hỏi cũ: "Video có tiêu đề giật gân có tỷ lệ click cao hơn không?"
+
+Chuyển hóa thành H 
+0
+​
+ ,H 
+1
+​
+ :
+
+Gọi P 
+1
+​
+  là tỷ lệ tương tác của video có từ khóa "SỐC/LỘ".
+
+Gọi P 
+2
+​
+  là tỷ lệ tương tác của video tiêu đề thường.
+
+H 
+0
+​
+ : Tiêu đề giật gân không tạo ra sự khác biệt về tỷ lệ tương tác so với tiêu đề thường. (P 
+1
+​
+ =P 
+2
+​
+ )
+
+H 
+1
+​
+ : Tiêu đề giật gân có tỷ lệ tương tác khác biệt (hoặc cao hơn) so với tiêu đề thường. (P 
+1
+​
+ 
+
+=P 
+2
+​
+ )
+
+3. Cách trình bày trong Report 1 (Mẫu)
+Trong file báo cáo, tại mục Research Hypotheses, bạn nên trình bày theo format bảng hoặc liệt kê rõ ràng như sau để giảng viên dễ chấm:
+
+Hypothesis 1: The Effect of Upload Time on Trending Probability
+
+Description: Nghiên cứu xem khung giờ đăng tải có ảnh hưởng đến khả năng video lọt vào Top Trending hay không.
+
+H 
+0
+​
+  (Null Hypothesis): There is no significant difference in the average views between videos uploaded during Golden Hours and Office Hours. (μ 
+golden
+​
+ =μ 
+office
+​
+ )
+
+H 
+1
+​
+  (Alternative Hypothesis): Videos uploaded during Golden Hours have significantly higher average views than those uploaded during Office Hours. (μ 
+golden
+​
+ >μ 
+office
+​
+ )
+
+Testing Method: T-test (Independent Samples).
+
+Tại sao giảng viên yêu cầu điều này?
+Họ muốn đảm bảo bạn không chỉ "nhìn biểu đồ rồi phán bừa". Việc đặt H 
+0
+​
+ /H 
+1
+​
+  là cam kết rằng: "Ở các report sau (Report 2, 3), em sẽ dùng thuật toán thống kê (như T-test, Chi-square, Correlation) để tính ra con số P-value nhằm kết luận khoa học, chứ không phải đoán mò."
+
+Bạn hãy viết theo mẫu trên cho 3 vấn đề của bạn là đạt điểm tối đa phần này nhé!
+
+sơ đồ kiến trúc docker
+
+Để báo cáo (Report 1) của bạn đạt điểm cao, sơ đồ kiến trúc Docker cần thể hiện rõ sự tách biệt nhiệm vụ (Separation of Concerns). Đối với dự án Data Science về YouTube/Spotify, chúng ta không nhồi nhét tất cả vào một chỗ, mà chia thành 3 container (services) riêng biệt.
+
+Dưới đây là sơ đồ chi tiết và code mẫu để bạn đưa vào báo cáo:
+
+1. Sơ đồ Kiến trúc (Architecture Diagram)
+Bạn có thể vẽ lại sơ đồ này bằng Draw.io hoặc Lucidchart để dán vào Word/PowerPoint.
+
+Mô hình luồng dữ liệu:
+
+Collector Service: Lấy dữ liệu từ Internet (YouTube API).
+
+Database Service: Lưu trữ dữ liệu tập trung (MongoDB).
+
+Analyst Service: Lấy dữ liệu từ Database để phân tích/huấn luyện model.
+
+Code snippet
+graph LR
+    subgraph "Docker Compose Network (Private)"
+        direction TB
+        Collector["<b>Service 1: Collector</b><br/>(Python Script)"]
+        DB[("<b>Service 2: Database</b><br/>(MongoDB)")]
+        Lab["<b>Service 3: Lab</b><br/>(Jupyter Notebook)"]
+        
+        Collector -->|1. Write Data (JSON)| DB
+        Lab -->|2. Read Data| DB
+    end
+    
+    API((YouTube API)) -->|Fetch| Collector
+    User((User/Student)) -->|Browser:8888| Lab
+2. Giải thích chi tiết các thành phần (Dùng cho phần nội dung báo cáo)
+Trong bài báo cáo, bạn cần giải thích vai trò của từng khối hộp trong sơ đồ trên:
+
+Service 1: Data Collector (The Miner)
+
+Vai trò: Chạy các script Python (get_trending.py) định kỳ.
+
+Nhiệm vụ: Kết nối tới YouTube Data API v3, tải danh sách video trending, xử lý sơ bộ (pre-processing) và đẩy vào Database.
+
+Tại sao cần? Tách biệt việc thu thập dữ liệu giúp hệ thống không bị treo khi phân tích, và có thể chạy tự động (cronjob) hàng ngày.
+
+Service 2: Database (The Warehouse)
+
+Công nghệ: MongoDB (Vì dữ liệu API trả về là dạng JSON, MongoDB lưu trữ linh hoạt hơn SQL truyền thống).
+
+Nhiệm vụ: Lưu trữ bền vững (Persistent Storage). Dù bạn tắt Docker, dữ liệu đã cào vẫn còn đó nhờ cơ chế Volumes.
+
+Service 3: Analyst Environment (The Laboratory)
+
+Công nghệ: Jupyter Lab (hoặc Streamlit nếu làm App).
+
+Nhiệm vụ: Nơi bạn viết code phân tích, vẽ biểu đồ, chạy kiểm định giả thuyết (H 
+0
+​
+ ,H 
+1
+​
+ ). Nó kết nối trực tiếp vào MongoDB để lấy dữ liệu sạch.
+
+3. Cấu hình kỹ thuật (docker-compose.yml)
+Bạn hãy copy đoạn code này vào phần phụ lục (Appendix) hoặc phần Technical Setup của báo cáo để chứng minh tính khả thi.
+
+YAML
+version: '3.8'
+
+services:
+  # --- Service 1: Thu thập dữ liệu ---
+  crawler:
+    image: python:3.9-slim
+    container_name: youtube_crawler
+    working_dir: /app
+    volumes:
+      - ./src:/app/src  # Mount code vào trong container
+    command: python src/data_loader.py # Chạy file thu thập
+    environment:
+      - MONGO_URI=mongodb://mongo_db:27017/youtube_data
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY} # Lấy từ file .env
+    depends_on:
+      - mongo_db # Chỉ chạy khi Database đã bật
+
+  # --- Service 2: Cơ sở dữ liệu ---
+  mongo_db:
+    image: mongo:latest
+    container_name: youtube_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db # Volume để không mất dữ liệu
+
+  # --- Service 3: Môi trường phân tích ---
+  jupyter:
+    image: jupyter/scipy-notebook
+    container_name: youtube_notebook
+    ports:
+      - "8888:8888" # Truy cập qua localhost:8888
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    environment:
+      - MONGO_URI=mongodb://mongo_db:27017/youtube_data
+    depends_on:
+      - mongo_db
+
+# Tạo nơi lưu trữ dữ liệu vĩnh viễn
+volumes:
+  mongodb_data:
+💡 Mẹo lấy điểm cộng (Bonus Point):
+Trong báo cáo, hãy thêm một dòng lưu ý về bảo mật:
+
+"The architecture utilizes a .env file to manage sensitive credentials like YOUTUBE_API_KEY, ensuring that secrets are not hard-coded into the repository, following DevOps best practices." (Kiến trúc sử dụng file .env để quản lý các thông tin nhạy cảm như API Key, đảm bảo tuân thủ quy chuẩn bảo mật DevOps).
+
+Bạn có cần mình viết mẫu file data_loader.py để kết nối YouTube API và lưu vào MongoDB luôn không?
+
+sơ đồ kiến trúc docker là gì và cần phải làm gì ở đó hãy giải thích mình mới bắt đầu học
+
+Chào bạn, vì bạn mới bắt đầu, mình sẽ giải thích khái niệm này một cách bình dân nhất, không dùng từ ngữ quá hàn lâm nhé.
+
+Hãy tưởng tượng bạn đang xây một ngôi nhà.
+
+Cách cũ (Không dùng Docker): Bạn xây tất cả phòng ngủ, bếp, toilet chung một sàn, không có tường ngăn. Nếu cái bếp bị cháy, cả nhà cháy theo. Nếu bạn muốn sửa ống nước toilet, bạn phải đục cả nền nhà lên.
+
+Cách dùng Docker (Containerization): Bạn xây nhà theo kiểu lắp ghép (Module). Phòng bếp là một cái container riêng, phòng ngủ là một container riêng. Chúng được nối với nhau bằng dây điện/ống nước.
+
+Nếu bếp cháy? Chỉ cần vứt cái container bếp đi, thay cái mới. Phòng ngủ vẫn an toàn.
+
+Muốn xây nhà khác y hệt? Chỉ cần bê nguyên bộ container sang chỗ mới là xong.
+
+1. Sơ đồ kiến trúc Docker trong dự án của bạn là gì?
+Trong "Report 1", khi giảng viên yêu cầu Sơ đồ kiến trúc Docker, họ muốn bạn vẽ ra một bức tranh thể hiện xem ứng dụng của bạn được chia nhỏ thành mấy cái hộp (container) và chúng nối với nhau thế nào.
+
+Đối với dự án YouTube Trending, thay vì viết tất cả code vào một file main.py khổng lồ, bạn sẽ chia nó ra làm 3 cái hộp độc lập:
+
+Hộp 1 (The Worker): Chuyên đi lấy dữ liệu từ YouTube (Crawler).
+
+Hộp 2 (The Warehouse): Chuyên chứa dữ liệu (Database - MongoDB).
+
+Hộp 3 (The Lab): Chuyên để bạn ngồi phân tích, vẽ biểu đồ (Jupyter Notebook).
+
+Sơ đồ kiến trúc chính là bản vẽ nối 3 cái hộp này lại.
+
+2. Bạn cần làm gì cụ thể trong Report 1?
+Để hoàn thành mục "Sơ đồ kiến trúc Docker" trong báo cáo, bạn cần làm đúng 3 bước sau:
+
+Bước 1: Vẽ sơ đồ (Architecture Diagram)
+Bạn cần một hình ảnh minh họa. Bạn có thể dùng Draw.io hoặc PowerPoint vẽ 3 hình chữ nhật đại diện cho 3 dịch vụ trên và các mũi tên chỉ đường đi của dữ liệu.
+
+Luồng đi: YouTube API → Crawler → MongoDB ← Jupyter Notebook.
+
+Giải thích:
+
+"Crawler lấy dữ liệu về, cất vào MongoDB."
+
+"Jupyter Notebook lấy dữ liệu từ MongoDB ra để phân tích."
+
+Bước 2: Tạo file "Công thức" (docker-compose.yml)
+Đây là phần quan trọng nhất để chứng minh sơ đồ của bạn chạy được. Bạn cần tạo một file tên là docker-compose.yml trong thư mục code.
+
+File này giống như tờ "thực đơn" dặn dò máy tính:
+
+"Máy ơi, hãy chạy cho tao 3 cái hộp cùng lúc: 1 cái chạy Python để cào data, 1 cái chạy MongoDB để lưu, và 1 cái chạy Jupyter để tao học."
+
+Nội dung file mẫu (Bạn copy cái này vào báo cáo là chuẩn):
+
+YAML
+version: '3'
+services:
+  # Hộp 1: Đi lấy dữ liệu
+  collector:
+    image: python:3.9
+    command: python get_data.py
+    volumes:
+      - ./code:/app
+    depends_on:
+      - database
+
+  # Hộp 2: Kho chứa dữ liệu
+  database:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+
+  # Hộp 3: Phòng phân tích
+  analysis:
+    image: jupyter/scipy-notebook
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    depends_on:
+      - database
+Bước 3: Giải thích tại sao làm thế này? (Lý do bảo vệ kiến trúc)
+Giảng viên sẽ hỏi: "Tại sao em phải dùng Docker cho rắc rối? Sao không chạy code bình thường?"
+
+Bạn hãy trả lời (hoặc viết vào report) 2 ý này:
+
+Sự cô lập (Isolation): "Nếu code cào dữ liệu của em bị lỗi crash, thì Database và file phân tích của em vẫn an toàn, không bị mất dữ liệu."
+
+Môi trường đồng nhất (Consistency): "Thầy chấm bài chỉ cần gõ 1 lệnh docker-compose up là chạy được ngay, không cần cài đặt Python hay thư viện phức tạp gì cả. Máy em chạy sao máy thầy chạy y vậy."
+
+Tóm lại
+Bạn mới học thì đừng lo về những thứ sâu xa. Hãy tập trung vào việc chia dự án thành 3 phần (Crawler - DB - Notebook) và dùng file docker-compose.yml để nối chúng lại. Đó chính là kiến trúc.
